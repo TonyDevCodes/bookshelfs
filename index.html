@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>BookShelf – Your Personal Mini Library</title>
+<meta name="description" content="Browse a curated personal book collection. Search and filter by title, author or category, and switch between light and dark mode.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://bookshelf-6wq.pages.dev/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="BookShelf – Your Personal Mini Library">
+<meta property="og:description" content="Browse, search and filter a curated personal book collection.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://bookshelf-6wq.pages.dev/og-image.png">
+<meta property="og:url" content="https://bookshelf-6wq.pages.dev/">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="BookShelf">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BookShelf – Your Personal Mini Library">
+<meta name="twitter:description" content="Browse, search and filter a curated personal book collection.">
+<meta name="twitter:image" content="https://bookshelf-6wq.pages.dev/og-image.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#111111">
+
+<link rel="stylesheet" href="style.css">
+
+<!-- Anti-flash theme script: runs before paint to avoid a wrong-theme flash -->
+<script>
+  (function () {
+    const saved = localStorage.getItem('bookshelf-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#" class="logo">📚 BookShelf</a>
+
+    <div class="header-controls">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="Search by title or author..." aria-label="Search books">
+        <select id="categoryFilter" aria-label="Filter by category">
+          <option value="all">All categories</option>
+          <!-- options populated dynamically by JS -->
+        </select>
+      </div>
+
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== Main ===== -->
+<main>
+  <section class="hero">
+    <h1>Discover your next read</h1>
+    <p>A small personal collection, searchable and always open.</p>
+  </section>
+
+  <section class="books-grid" id="booksGrid">
+    <!-- book cards injected here by JS -->
+  </section>
+
+  <p class="no-results" id="noResults" hidden>No books match your search.</p>
+</main>
+
+<!-- ===== Book Detail Modal ===== -->
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    <div class="modal-content" id="modalContent">
+      <!-- filled dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== Request a Book ===== -->
+<section class="request-section" id="request">
+  <h2>Request a book</h2>
+  <p>Can't find what you're looking for? Let us know.</p>
+
+  <form id="requestForm" class="request-form" action="https://formspree.io/f/xbgrbbnq" method="POST">
+    <input type="text" name="name" placeholder="Your name" required>
+    <input type="email" name="email" placeholder="Your email" required>
+    <input type="text" name="book_title" placeholder="Book title you're looking for" required>
+    <textarea name="message" placeholder="Additional notes (optional)" rows="4"></textarea>
+    <button type="submit">Send request</button>
+  </form>
+
+  <p class="form-success" id="formSuccess" hidden>Thanks! Your request has been sent.</p>
+  <p class="form-error" id="formError" hidden></p>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> BookShelf. Built with vanilla HTML, CSS &amp; JS.</p>
+</footer>
+
+<script src="books-data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
