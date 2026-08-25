@@ -1,4 +1,4 @@
-# BookShelf — Your Personal Mini Library
+
 # BookShelf: Your Personal Mini Library
 
 A searchable, filterable personal book collection. Built with zero frameworks and zero build step: vanilla HTML, CSS and JavaScript, running entirely in the browser.
