@@ -11,8 +11,17 @@ The goal was to prove that a genuinely polished, interactive UI (search, filteri
 
 ## Architecture
 
+bookshelf/
+├── index.html # markup shell + inline anti-flash theme script
+├── style.css # design tokens (CSS custom properties), layout, themes
+├── script.js # rendering, search/filter, modal, theme toggle, form
+├── books-data.js # book data, decoupled from all logic
+├── favicon.svg
+├── sitemap.xml
+└── robots.txt
 
 Data lives in its own file (`books-data.js`), completely separate from rendering logic. `script.js` never hardcodes book content; it only knows how to render whatever `books-data.js` provides, so updating the collection never touches application logic.
+
 
 ## Feature summary
 
