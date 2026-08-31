@@ -4,7 +4,7 @@
 // If a cover fails to load, script.js falls back to a placeholder.
 // ==========================================================
 
-const booksData = [
+export const booksData = [
   {
     id: 1,
     title: "To Kill a Mockingbird",
