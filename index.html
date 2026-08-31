@@ -71,6 +71,13 @@
     <p>A small personal collection, searchable and always open.</p>
   </section>
 
+  <section class="recommendations" id="recommendations" hidden aria-labelledby="recommendationsHeading">
+    <h2 class="recommendations-heading" id="recommendationsHeading">Recommended for you</h2>
+    <div class="books-grid" id="recommendationsGrid">
+      <!-- recommended book cards injected here by JS -->
+    </div>
+  </section>
+
   <section class="books-grid" id="booksGrid">
     <!-- book cards injected here by JS -->
   </section>
@@ -110,7 +117,6 @@
   <p>&copy; <span id="year"></span> BookShelf. Built with vanilla HTML, CSS &amp; JS.</p>
 </footer>
 
-<script src="books-data.js"></script>
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>

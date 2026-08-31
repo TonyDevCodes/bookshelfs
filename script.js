@@ -1,11 +1,17 @@
 // ==========================================================
-// BookShelf — script.js (Step 2: render + search/filter)
+// BookShelf — script.js (render + search/filter + recommendations)
 // ==========================================================
+
+import { booksData } from './books-data.js';
+import { recommendBooks } from './recommendations.mjs';
+import { getLikedIds, isLiked, toggleLike } from './liked-books.mjs';
 
 const booksGrid = document.getElementById('booksGrid');
 const noResults = document.getElementById('noResults');
 const searchInput = document.getElementById('searchInput');
 const categoryFilter = document.getElementById('categoryFilter');
+const recommendationsSection = document.getElementById('recommendations');
+const recommendationsGrid = document.getElementById('recommendationsGrid');
 
 const FALLBACK_COVER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300">
@@ -18,12 +24,28 @@ function coverUrl(isbn) {
   return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
 }
 
+// Heart toggle shown in the corner of every book card. The glyph itself is
+// drawn in CSS from aria-pressed, so refreshing state only touches attributes.
+function likeButtonMarkup(book) {
+  const liked = isLiked(book.id);
+  return `
+    <button
+      class="like-btn"
+      type="button"
+      data-book-id="${book.id}"
+      aria-pressed="${liked}"
+      aria-label="${liked ? 'Unlike' : 'Like'} ${book.title}"
+    ></button>
+  `;
+}
+
 function createBookCard(book) {
   const card = document.createElement('article');
   card.className = 'book-card';
   card.dataset.id = book.id;
 
   card.innerHTML = `
+    ${likeButtonMarkup(book)}
     <img
       class="book-cover"
       src="${coverUrl(book.isbn)}"
@@ -75,6 +97,58 @@ function observeCards() {
   });
 }
 
+// ==========================================================
+// Recommended for you
+// ==========================================================
+
+// Skip a re-render when the picks haven't actually changed, so liking a book
+// that doesn't shift the list doesn't re-run the card fade-in.
+let renderedPickIds = null;
+
+function renderRecommendations() {
+  const picks = recommendBooks(booksData, getLikedIds());
+  const pickIds = picks.map(book => book.id).join(',');
+  if (pickIds === renderedPickIds) return;
+  renderedPickIds = pickIds;
+
+  recommendationsGrid.innerHTML = '';
+
+  if (picks.length === 0) {
+    recommendationsSection.hidden = true;
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  picks.forEach(book => fragment.appendChild(createBookCard(book)));
+  recommendationsGrid.appendChild(fragment);
+  recommendationsSection.hidden = false;
+  observeCards();
+}
+
+// Toggle a like from anywhere (grid card, recommendation card, or modal),
+// then refresh every visible control for that book and the picks list.
+function applyLikeToggle(bookId) {
+  toggleLike(bookId);
+  syncLikeControls(bookId);
+  renderRecommendations();
+}
+
+function syncLikeControls(bookId) {
+  const book = booksData.find(b => b.id === bookId);
+  const liked = isLiked(bookId);
+
+  document.querySelectorAll(`.like-btn[data-book-id="${bookId}"]`).forEach(btn => {
+    btn.setAttribute('aria-pressed', String(liked));
+    if (book) btn.setAttribute('aria-label', `${liked ? 'Unlike' : 'Like'} ${book.title}`);
+  });
+
+  const modalBtn = modalContent.querySelector(`.modal-like[data-book-id="${bookId}"]`);
+  if (modalBtn) {
+    modalBtn.setAttribute('aria-pressed', String(liked));
+    modalBtn.textContent = liked ? '♥ Liked' : '♡ Like this book';
+  }
+}
+
 function populateCategories() {
   const categories = [...new Set(booksData.map(b => b.category))].sort();
   categories.forEach(cat => {
@@ -112,6 +186,7 @@ categoryFilter.addEventListener('change', applyFilters);
 // ===== Init =====
 populateCategories();
 renderBooks(booksData);
+renderRecommendations();
 document.getElementById('year').textContent = new Date().getFullYear();
 
 // ==========================================================
@@ -145,6 +220,7 @@ const modalClose = document.getElementById('modalClose');
 let lastFocusedElement = null;
 
 function openModal(book) {
+  const liked = isLiked(book.id);
   modalContent.innerHTML = `
     <div class="modal-body">
       <img
@@ -161,6 +237,12 @@ function openModal(book) {
           <span class="book-year">${book.year}</span>
         </div>
         <p class="modal-description">${book.description}</p>
+        <button
+          class="modal-like"
+          type="button"
+          data-book-id="${book.id}"
+          aria-pressed="${liked}"
+        >${liked ? '♥ Liked' : '♡ Like this book'}</button>
       </div>
     </div>
   `;
@@ -189,12 +271,28 @@ function closeModal() {
   }
 }
 
-// Open modal when a book card is clicked
-booksGrid.addEventListener('click', (e) => {
+// Clicks inside either grid: a like button toggles the like; anywhere else
+// on a card opens the detail modal.
+function handleGridClick(e) {
+  const likeBtn = e.target.closest('.like-btn');
+  if (likeBtn) {
+    applyLikeToggle(Number(likeBtn.dataset.bookId));
+    return;
+  }
+
   const card = e.target.closest('.book-card');
   if (!card) return;
   const book = booksData.find(b => b.id === Number(card.dataset.id));
   if (book) openModal(book);
+}
+
+booksGrid.addEventListener('click', handleGridClick);
+recommendationsGrid.addEventListener('click', handleGridClick);
+
+// Like button inside the open modal.
+modalContent.addEventListener('click', (e) => {
+  const likeBtn = e.target.closest('.modal-like');
+  if (likeBtn) applyLikeToggle(Number(likeBtn.dataset.bookId));
 });
 
 // Close modal: X button
