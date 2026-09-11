@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bookshelf-6wq.pages.dev/sitemap.xml
