@@ -3,6 +3,7 @@
 A searchable, filterable personal book collection. Built with zero frameworks and zero build step: vanilla HTML, CSS and JavaScript, running entirely in the browser.
 
 **Live demo:** [bookshelf-6wq.pages.dev](https://bookshelf-6wq.pages.dev)
+![BookShelf Demo](Bookshelf-demo.png)
 
 ## Why vanilla JS?
 
